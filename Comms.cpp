@@ -1,65 +1,7 @@
 
 #include "Comms.h"
-
-int setupPort(int* fd, char* uart_name, int baudrate) {
-    // SETUP SERIAL PORT
-
-    // Exit if opening port failed
-    // Open the serial port.
-    if (!silent) printf("Trying to connect to %s.. ", uart_name);
-    fflush(stdout);
-    *fd = open_port(uart_name);
-    if (*fd == -1) {
-        if (!silent) printf("failure, could not open port.\n");
-        return (EXIT_FAILURE);
-    } else {
-        if (!silent) printf("success.\n");
-    }
-    if (!silent) printf("Trying to configure %s.. ", uart_name);
-    bool setup = setup_port(*fd, baudrate, 8, 1, false, false);
-    if (!setup) {
-        if (!silent) printf("failure, could not configure port.\n");
-        return (EXIT_FAILURE);
-    } else {
-        if (!silent) printf("success.\n");
-    }
-
-    int noErrors = 0;
-    if (*fd == -1 || *fd == 0) {
-        if (!silent) fprintf(stderr, "Connection attempt to port %s with %d baud, 8N1 failed, exiting.\n", uart_name, baudrate);
-        return (EXIT_FAILURE);
-    } else {
-        if (!silent) fprintf(stderr, "\nConnected to %s with %d baud, 8 data bits, no parity, 1 stop bit (8N1)\n", uart_name, baudrate);
-    }
-
-    if (*fd < 0) {
-        return (noErrors);
-    }
-    return 2;
-}
-
-/**
- *
- *
- * Returns the file descriptor on success or -1 on error.
- */
-int open_port(const char* port) {
-    int fd; /* File descriptor for the port */
-
-    // Open serial port
-    // O_RDWR - Read and write
-    // O_NOCTTY - Ignore special chars like CTRL-C
-    fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
-    if (fd == -1) {
-        /* Could not open the port. */
-        return (-1);
-    } else {
-        fcntl(fd, F_SETFL, 0);
-    }
-
-    return (fd);
-}
-
+#include <sstream>
+bool silent = false; ///< Wether console output should be enabled
 bool setup_port(int fd, int baud, int data_bits, int stop_bits, bool parity, bool hardware_control) {
     //struct termios options;
 
@@ -190,29 +132,90 @@ bool setup_port(int fd, int baud, int data_bits, int stop_bits, bool parity, boo
     }
     return true;
 }
+int open_port(const char* port) {
+    int fd; /* File descriptor for the port */
+
+    // Open serial port
+    // O_RDWR - Read and write
+    // O_NOCTTY - Ignore special chars like CTRL-C
+    fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
+    if (fd == -1) {
+        /* Could not open the port. */
+        return (-1);
+    } else {
+        fcntl(fd, F_SETFL, 0);
+    }
+
+    return (fd);
+}
+int setupPort(int* fd, char* uart_name, int baudrate) {
+    // SETUP SERIAL PORT
+
+    // Exit if opening port failed
+    // Open the serial port.
+    if (!silent) printf("Trying to connect to %s.. ", uart_name);
+    fflush(stdout);
+    *fd = open_port(uart_name);
+    if (*fd == -1) {
+        if (!silent) printf("failure, could not open port.\n");
+        return (EXIT_FAILURE);
+    } else {
+        if (!silent) printf("success.\n");
+    }
+    if (!silent) printf("Trying to configure %s.. ", uart_name);
+    bool setup = setup_port(*fd, baudrate, 8, 1, false, false);
+    if (!setup) {
+        if (!silent) printf("failure, could not configure port.\n");
+        return (EXIT_FAILURE);
+    } else {
+        if (!silent) printf("success.\n");
+    }
+
+    int noErrors = 0;
+    if (*fd == -1 || *fd == 0) {
+        if (!silent) fprintf(stderr, "Connection attempt to port %s with %d baud, 8N1 failed, exiting.\n", uart_name, baudrate);
+        return (EXIT_FAILURE);
+    } else {
+        if (!silent) fprintf(stderr, "\nConnected to %s with %d baud, 8 data bits, no parity, 1 stop bit (8N1)\n", uart_name, baudrate);
+    }
+
+    if (*fd < 0) {
+        return (noErrors);
+    }
+    return 2;
+}
+
+/**
+ *
+ *
+ * Returns the file descriptor on success or -1 on error.
+ */
+
+
+
+
 
 void close_port(int fd) {
     close(fd);
 }
 
 
-mavlink_message_t serial_readMSG(int serial_fd) {
+bool serial_readMSG(int serial_fd,mavlink_message_t* msg) {
     int fd = serial_fd;
     // Blocking wait for new data
     uint8_t msgReceived = false;
-    mavlink_message_t message;
 
     uint8_t cp;
     mavlink_status_t status;
 
     while (read(fd, &cp, 1) > 0) {      
             // Check if a message could be decoded, return the message in case yes
-        msgReceived = mavlink_parse_char(MAVLINK_COMM_1, cp, &message, &status);
+        msgReceived = mavlink_parse_char(MAVLINK_COMM_1, cp, msg, &status);
         if(msgReceived) {
-            return message;
+            return true;
         }
     }
-    return NULL;
+    return false;
 }
 
 int sendCamData(int serial_fd, uint16_t trigger_id, int trees[MAX_NUM_OF_TREES][2]) {
@@ -284,3 +287,10 @@ int sendTrigger(int serial_fd, uint16_t trigger_id) {
 }
 
 
+std::string numberToString(int num) {
+    ostringstream strout;
+    string str;
+    strout << num;
+    str = strout.str();
+    return str;
+}

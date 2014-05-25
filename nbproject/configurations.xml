@@ -17,6 +17,7 @@
                    projectFiles="true">
       <itemPath>Comms.cpp</itemPath>
       <itemPath>ImageProcessing.cpp</itemPath>
+      <itemPath>cap_test.cpp</itemPath>
       <itemPath>manager.cpp</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
@@ -29,6 +30,7 @@
                    projectFiles="false"
                    kind="IMPORTANT_FILES_FOLDER">
       <itemPath>Makefile</itemPath>
+      <itemPath>manager</itemPath>
     </logicalFolder>
   </logicalFolder>
   <projectmakefile>Makefile</projectmakefile>
@@ -54,6 +56,8 @@
       <item path="ImageProcessing.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ImageProcessing.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="cap_test.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="leds.h" ex="false" tool="3" flavor2="0">
       </item>
@@ -87,6 +91,8 @@
       <item path="ImageProcessing.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="ImageProcessing.h" ex="false" tool="3" flavor2="0">
+      </item>
+      <item path="cap_test.cpp" ex="false" tool="1" flavor2="0">
       </item>
       <item path="leds.h" ex="false" tool="3" flavor2="0">
       </item>

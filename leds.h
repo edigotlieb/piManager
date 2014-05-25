@@ -17,14 +17,41 @@
 #include <inttypes.h>
 #include <fstream>
 
+#define RED_LED 14
+#define BLUE_LED 15
+#define ON 1
+#define OFF 0
+
 using namespace std;
 
-std::string numberToString(int num) {
+std::string number2String(int num) {
     ostringstream strout;
     string str;
     strout << num;
     str = strout.str();
     return str;
+}
+
+int init_pin(int pin) {
+    string pin_str = number2String(pin);
+    string dir = "/sys/class/gpio/export";
+    ofstream file(dir.c_str());
+    if (file < 0) {
+        //error
+        return -1;
+    }
+    file << pin;
+    file.close();
+    dir = "/sys/class/gpio/gpio" + pin_str + "/direction";
+    cout << dir << endl;
+    file.open(dir.c_str());
+    if (file < 0) {
+        //error
+        return -1;
+    }
+    file << "out";
+    file.close();
+    return 1;
 }
 
 
@@ -33,8 +60,8 @@ int write_pin(int pin, int value) {
         //error
         return -1;
     }
-    string value_str = numberToString(value);
-    string pin_str = numberToString(pin);
+    string value_str = number2String(value);
+    string pin_str = number2String(pin);
     string dir = "/sys/class/gpio/gpio" + pin_str + "/value";
     ofstream file(dir.c_str());
     if (file < 0) {
@@ -46,7 +73,7 @@ int write_pin(int pin, int value) {
 }
 
 int read_pin(int pin){
-    string pin_str = numberToString(pin);
+    string pin_str = number2String(pin);
     string dir = "/sys/class/gpio/gpio" + pin_str + "/value";
     ifstream file(dir.c_str());
     if (file < 0) {

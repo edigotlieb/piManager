@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/Comms.o \
 	${OBJECTDIR}/ImageProcessing.o \
+	${OBJECTDIR}/cap_test.o \
 	${OBJECTDIR}/manager.o
 
 
@@ -73,6 +74,11 @@ ${OBJECTDIR}/ImageProcessing.o: ImageProcessing.cpp
 	${MKDIR} -p ${OBJECTDIR}
 	${RM} "$@.d"
 	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/ImageProcessing.o ImageProcessing.cpp
+
+${OBJECTDIR}/cap_test.o: cap_test.cpp 
+	${MKDIR} -p ${OBJECTDIR}
+	${RM} "$@.d"
+	$(COMPILE.cc) -O2 -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/cap_test.o cap_test.cpp
 
 ${OBJECTDIR}/manager.o: manager.cpp 
 	${MKDIR} -p ${OBJECTDIR}

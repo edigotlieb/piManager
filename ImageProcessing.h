@@ -61,7 +61,6 @@ using namespace cv;
 #define MEMORY_ALLOC_ERR 1
 #define FILE_OPEN_ERR 2
 
-
 struct FilterApplier 
 {
     /**
@@ -83,16 +82,23 @@ struct FilterApplier
     bool isOpened();
     
     /**
-     * Takes a photo through the camera and finds trees in it. 
+     * Reloads the configuration files mentioned in the constructor description. 
+     * @return true if reload was successful and false otherwise. 
+     */
+    bool reload();
+    
+    /**
+     * Takes an image and find trees in it. 
+     * @param image - The image to process. 
      * @param treeLocations - Array that will contain pairs of tree left border and right border. 
      * Each row is a pair and there are MAX_NUM_OF_TREES rows. If less trees than MAX_NUM_OF_TREES 
      * were found, the rest of the rows will be filled with zeros. 
      */
-    void findTrees(int treeLocations[MAX_NUM_OF_TREES][2]);
+    void applyAllFilters(Mat& image, int treeLocations[MAX_NUM_OF_TREES][2]);
 
 private:
-    // Complete processing of the image found in _matOrig. 
-    void applyAllFilters(int treeLocations[MAX_NUM_OF_TREES][2]);
+    // For debug purposes returns the actual image after analysis. 
+    Mat& applyAllFiltersRetMat(int treeLocations[MAX_NUM_OF_TREES][2]);
     // Transfers _matNew to _matOrig and clears _matNew. 
     void new2orig();
     // Imports the data for mahalDistance from ./ConfFiles/mahalanobis.conf. 
@@ -120,7 +126,6 @@ private:
     // matrix. 
     void blobAnalysis(int treeLocations[MAX_NUM_OF_TREES][2]);
 
-    VideoCapture _vidCap;
     int ***_mahalanobisData;
     Mat *_matOrig;
     Mat *_matNew;

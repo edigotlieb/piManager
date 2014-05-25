@@ -1,4 +1,3 @@
-
 #include "ImageProcessing.h"
 
 using namespace std;
@@ -9,16 +8,7 @@ bool showPhotos = false;
 FilterApplier::FilterApplier()
 {
     _error = false;
-    
-    // Set up VideoCapture
-    _vidCap.open(0);
-    _error = !_vidCap.isOpened()
-    
-    _vidCap.set(CV_CAP_PROP_FRAME_WIDTH, IMAGE_WIDTH);
-    _vidCap.set(CV_CAP_PROP_FRAME_HEIGHT, IMAGE_HEIGHT);
-    
-    // Set up FilterApplier
-    _error = _error || (!FilterApplier::importMahalanobis()) && (!FilterApplier::importLines());
+    _error = FilterApplier::importMahalanobis() || FilterApplier::importLines();
     FilterApplier::createDiamond();
     _matOrig = new Mat();
     _matNew = new Mat();
@@ -31,15 +21,20 @@ FilterApplier::~FilterApplier()
 	for(int j = 0; j < GRAYSCALE_MAX_VALUE; j++)
 	{
 	    delete [] _mahalanobisData[i][j];
+	    _mahalanobisData[i][j] = NULL;
 	}
     }
     for(int i = 0; i < GRAYSCALE_MAX_VALUE; i++)
     {
 	delete [] _mahalanobisData[i];
+	_mahalanobisData[i] = NULL;
     }
     delete [] _mahalanobisData;
+    _mahalanobisData = NULL;
     delete _matOrig;
+    _matOrig = NULL;
     delete _matNew;
+    _matNew = NULL;
 }
 
 bool FilterApplier::isOpened()
@@ -47,14 +42,15 @@ bool FilterApplier::isOpened()
     return !_error;
 }
 
-void FilterApplier::findTrees(int treeLocations[MAX_NUM_OF_TREES][2])
+bool FilterApplier::reload()
 {
-    _vidCap >> *_matOrig;
-    FilterApplier::applyAllFilters(treeLocations);
+    return !(FilterApplier::importMahalanobis() || FilterApplier::importLines());
 }
 
-void FilterApplier::applyAllFilters(int treeLocations[MAX_NUM_OF_TREES][2])
+void FilterApplier::applyAllFilters(Mat& image, int treeLocations[MAX_NUM_OF_TREES][2])
 {
+    image.copyTo(*_matOrig);
+    
     if(showPhotos)
 	imshow("Original Image", *_matOrig);
     
@@ -101,6 +97,55 @@ void FilterApplier::applyAllFilters(int treeLocations[MAX_NUM_OF_TREES][2])
 
     // Phase 6: Blob Detection
     FilterApplier::blobAnalysis(treeLocations);
+}
+
+Mat& FilterApplier::applyAllFiltersRetMat(int treeLocations[MAX_NUM_OF_TREES][2])
+{
+    if(showPhotos)
+	imshow("Original Image", *_matOrig);
+    
+    // Phase 1: Median Filter
+    medianBlur(*_matOrig, *_matNew, MEDIAN_FILTER_KERNEL_SIZE);
+    new2orig();
+    if(showPhotos)
+	imshow("Blurred Image", *_matOrig);
+
+    // Phase 2: Color Distance
+    FilterApplier::mahalDistance();
+    if(showPhotos)
+	imshow("Mahal Image", *_matOrig);
+    
+    // Phase 3: Threshold
+    threshold(*_matOrig, *_matNew, THRESHOLD_VALUE, GRAYSCALE_MAX_VALUE - 1, THRESH_BINARY_INV);
+    new2orig();
+    if(showPhotos)
+	imshow("Thresh Image", *_matOrig);
+
+    // Phase 4: Cleanup
+    dilate(*_matOrig, *_matNew, _diamond);
+    new2orig();
+    FilterApplier::fillSmallHoles(SMALL_HOLES_CONSTANT);
+    FilterApplier::removeSmallTrees(SMALL_TREES_CONSTANT);
+    if(showPhotos)
+	imshow("Cleanup Image", *_matOrig);
+
+    // Phase 4: Hough Transform and Peek finding
+    int peaks[NUM_OF_PEAKS];
+    int numOfPeaks;
+    FilterApplier::houghTransform(peaks, &numOfPeaks);
+    if(showPhotos)
+	imshow("Morph Image", *_matOrig);
+
+    // Phase 5: Morphologies
+    FilterApplier::applyMorphologies(peaks, numOfPeaks);
+    FilterApplier::removeSmallTrees(SMALL_TREES_CONSTANT);
+    if(showPhotos)
+    {
+	imshow("Final Image", *_matOrig);
+	waitKey(0);
+    }
+    
+    return *_matOrig;
 }
 
 void FilterApplier::new2orig()
@@ -256,7 +301,14 @@ void FilterApplier::mahalDistance()
     }
     
     // Converts the given matrix to grayscale
-    tmp.convertTo(*_matNew, CV_8UC1, 255.0 / (max - min), -255.0 * min / (max - min));
+    if(min == max)
+    {
+	tmp.convertTo(*_matNew, CV_8UC1, 0);
+    }
+    else
+    {
+	tmp.convertTo(*_matNew, CV_8UC1, 255.0 / (max - min), -255.0 * min / (max - min));
+    }
     new2orig();
 }
 

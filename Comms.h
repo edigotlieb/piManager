@@ -10,11 +10,12 @@
 
 // Serial includes
 #include <stdio.h>   /* Standard input/output definitions */
-#include <string.h>  /* String function definitions */
+#include <string>  /* String function definitions */
 #include <unistd.h>  /* UNIX standard function definitions */
 #include <fcntl.h>   /* File control definitions */
 #include <errno.h>   /* Error number definitions */
 #include <termios.h> /* POSIX terminal control definitions */
+#include <stdlib.h>
 #ifdef __linux
 #include <sys/ioctl.h>
 #endif
@@ -25,7 +26,6 @@
 
 
 #define MAX_NUM_OF_TREES 10
-#define EXIT_FAILURE -1
 
 #define CALIBRATION_MESSAGE "piCalib"
 #define TRIGGER_MESSAGE "piTrigger"
@@ -37,7 +37,6 @@
 using namespace std;
 
 
-bool silent = false; ///< Wether console output should be enabled
 
 typedef enum read_results {
     IMAGE_SENT,
@@ -49,10 +48,10 @@ typedef enum read_results {
 
 
 int setupPort(int* fd, char* uart_name, int baudrate);
-mavlink_message_t serial_readMSG(int serial_fd);
+bool serial_readMSG(int serial_fd,mavlink_message_t* msg);
 int sendTrigger(int serial_fd, uint16_t trigger_id);
 int sendCamData(int serial_fd, uint16_t trigger_id, int trees[MAX_NUM_OF_TREES][2]);
-
+string numberToString(int num);
 
 
 #endif	/* COMMS_H */
