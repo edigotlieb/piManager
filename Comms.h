@@ -27,8 +27,8 @@
 #define MAX_NUM_OF_TREES 10
 #define EXIT_FAILURE -1
 
-#define CALIBRATION_MESSAGE "piCalibrat"
-#define TRIGGER "piTrigger"
+#define CALIBRATION_MESSAGE "piCalib"
+#define TRIGGER_MESSAGE "piTrigger"
 
 
 #define PORT "/dev/ttyACM0"
@@ -46,6 +46,12 @@ typedef enum read_results {
     TRIGGER_RECIEVED,
     NOTHING
 } read_results;
+
+
+int setupPort(int* fd, char* uart_name, int baudrate);
+mavlink_message_t serial_readMSG(int serial_fd);
+int sendTrigger(int serial_fd, uint16_t trigger_id);
+int sendCamData(int serial_fd, uint16_t trigger_id, int trees[MAX_NUM_OF_TREES][2]);
 
 
 

@@ -212,7 +212,7 @@ mavlink_message_t serial_readMSG(int serial_fd) {
             return message;
         }
     }
-    return 0;
+    return NULL;
 }
 
 int sendCamData(int serial_fd, uint16_t trigger_id, int trees[MAX_NUM_OF_TREES][2]) {

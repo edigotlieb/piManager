@@ -65,19 +65,6 @@ void blink(int pin) {
     usleep(250000);
 }
 
-void blink(int pin,int sleep_time) {
-    int value = read_pin(pin);
-    cout <<"old value "<< value<<endl;
-    if (value!=0 && value!=1){
-    value=0;
-    }
-    value = (value+1)%2;
-    cout << "new value " <<value<<endl;
-    write_pin(value,1);
-    usleep(sleep_time);
-    write_pin((value+1)%2,0);
-    usleep(sleep_time);
-}
 
 #endif	/* LEDS_H */
 
