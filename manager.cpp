@@ -402,7 +402,7 @@ void addTreesToLogFile(int trees[MAX_NUM_OF_TREES][2])
     flush++;
     if(flush == TIMES_TO_FLUSH)
     {
-	treeLogFile.flush()l
+	treeLogFile.flush();
 	flush = 0;
     }
 }

@@ -27,7 +27,7 @@ using namespace cv;
 // Image Constants
 #define IMAGE_WIDTH 160
 #define IMAGE_HEIGHT 120
-#define PIXEL_TO_ANGLE 0.3375
+#define PIXEL_TO_ANGLE 33.75
 #define GRAYSCALE_MAX_VALUE 256
 
 // General
