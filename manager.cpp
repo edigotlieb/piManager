@@ -28,6 +28,7 @@
 
 bool processNewMsg(mavlink_message_t msg);
 bool calibrate();
+void addTreesToLogFile(int trees[MAX_NUM_OF_TREES][2]);
 void inError();
 
 bool startTrigger = false;
@@ -383,17 +384,18 @@ void addTreesToLogFile(int trees[MAX_NUM_OF_TREES][2])
 
     // Add headers
     clock_t time = clock() - startOfRun;
-    string timestamp = "Timestamp: " + time + "\n";
+    string timestamp = "Timestamp: " + numberToString(time) + "\n";
     treeLogFile.write(timestamp.c_str(), timestamp.length());
     string treesHeader = "Trees were found in the following locations: \n";
     treeLogFile.write(treesHeader.c_str(), treesHeader.length());
 
     // Add tree info
-    string trees;
+    string treesString;
     for(int i = 0; i < MAX_NUM_OF_TREES; i++)
     {
-	trees = "Left Border = " + trees[i][0] + ", Right Border = " + trees[i][1] + "\n";
-	treeLogFile.write(trees.c_str(), trees.length());
+	treesString = "Left Border = " + numberToString(trees[i][0]) + ", Right Border = " + 
+		numberToString(trees[i][1]) + "\n";
+	treeLogFile.write(treesString.c_str(), treesString.length());
     }
     treeLogFile.put('\n');
     treeLogFile.put('\n');
